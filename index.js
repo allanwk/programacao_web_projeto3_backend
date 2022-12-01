@@ -7,12 +7,15 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 app.use(require("./routes/user"));
+app.use("/post", require("./routes/post"));
 
 app.use(
   expressjwt({
     secret: process.env.JWT_SECRET,
     algorithms: ["HS256"],
-  }).unless({ path: ["/login", "/register"] })
+  }).unless({
+    path: ["/login", "/register", { url: "/post", methods: ["GET"] }],
+  })
 );
 
 app.use(function (err, req, res, next) {

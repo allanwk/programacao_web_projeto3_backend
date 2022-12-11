@@ -1,5 +1,5 @@
 const { listPosts, savePost } = require("../model/post");
-const { verifyToken } = require("./user");
+const { verifyToken } = require("../model/user");
 
 const cloudinary = require("cloudinary").v2;
 cloudinary.config({
@@ -17,14 +17,14 @@ async function createPost(req, res) {
   if (authorizationHeader) {
     const token = authorizationHeader.split("Bearer ")[1];
     try {
-      const decoded = verifyToken(token);
+      const decoded = await verifyToken(token);
       if (!decoded.isAdmin) {
-        return res.json({
+        return res.status(401).json({
           message: "You need to be an administrator to create posts",
         });
       }
     } catch {
-      return res.json({ message: "Invalid token" });
+      return res.status(401).json({ message: "Invalid token" });
     }
   }
 
@@ -39,20 +39,26 @@ async function createPost(req, res) {
     });
     imageUrl = resp.secure_url;
   } catch (err) {
-    return res.json({ error: "Error uploading image to Cloudinary" });
+    return res
+      .status(500)
+      .json({ error: "Error uploading image to Cloudinary" });
   }
 
   if (savePost(title, description, author, category, url, imageUrl)) {
-    return res.json({ message: "Post saved successfully" });
+    return res.status(200).json({ message: "Post saved successfully" });
   } else {
-    return res.json({ error: "Error saving post" });
+    return res.status(500).json({ error: "Error saving post" });
   }
 }
 
 async function getPosts(req, res) {
-  const { search } = req.query;
-  const news = await listPosts(search);
-  res.json({ news });
+  try {
+    const { search } = req.query;
+    const news = await listPosts(search);
+    res.status(200).json({ news });
+  } catch {
+    res.status(500);
+  }
 }
 
 module.exports = {

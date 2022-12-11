@@ -14,7 +14,7 @@ async function register(req, res) {
   }
 
   if (await verifyUserExists(user, email)) {
-    return res.json({
+    return res.status(400).json({
       message: "Username or e-mail already taken",
     });
   }
@@ -34,7 +34,7 @@ async function login(req, res) {
   if (token) {
     try {
       const decoded = await verifyToken(token);
-      return res.json({ decoded });
+      return res.status(200).json({ decoded });
     } catch {
       return res.status(401).json({ error: "Invalid token" });
     }
@@ -46,7 +46,7 @@ async function login(req, res) {
 
   const userObj = await getUser(user, email);
   if (!userObj) {
-    return res.json({ error: "Invalid credentials" });
+    return res.status(400).json({ error: "Invalid credentials" });
   }
 
   if (await checkPassword(password, userObj)) {
@@ -57,7 +57,7 @@ async function login(req, res) {
       isAdmin,
     });
   }
-  return res.json({ error: "Invalid credentials" });
+  return res.status(400).json({ error: "Invalid credentials" });
 }
 
 module.exports = {

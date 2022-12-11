@@ -50,7 +50,7 @@ function signToken(user, email) {
 async function verifyToken(token) {
   return new Promise((resolve, reject) =>
     jwt.verify(token, process.env.JWT_SECRET, (err, decoded) =>
-      err ? reject({}) : resolve(decoded)
+      err ? reject("Invalid token") : resolve(decoded)
     )
   );
 }
